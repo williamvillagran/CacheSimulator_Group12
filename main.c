@@ -1,54 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <main.h>
-
-void inputOutput(int cache, int block, int associativity, char replacementPolicy[30], int percentageMem, int intructionTimeSlice,
-                     char traceFile1[30], char traceFile2[30], char traceFile3[30]){
-    printf("Cache Simulator - CS 3853 - Group 12\n\n");
-    
-    printf("Trace File(s):\n"
-            "\t\t%s"
-            "\t\t%s"
-            "\t\t%s", traceFile1, traceFile2, traceFile3);
-
-    printf("***** Cache Input Parameters *****");
-
-    int cacheSize = calcCacheSize(1, 2, 3);
-    printf("%d", "Cache Size:       %d", cacheSize);
-    printf("%d", "Block Size:");
-    printf("%d", "Associativity:");
-    printf("%c", "Replacement Policy:");
-    printf("%d", "Physical Memory:");
-    printf("%d", "Percent Memory Used by System:");
-    printf("%c", "Instructions/ Time Slice:");
-
-}
-
-void calculatedOutput(){
-    int cacheSize = calcCacheSize(1, 2, 3);
-    printf("***** Cache Calculated Values *****\n\n"
-            "Total # Blocks:                \n"
-            "Tag Size:                      \n"
-            "Index Size:                    \n"
-            "Total # Rows:                  \n"
-            "Overhead Size:                 \n"
-            "Implementation Memory Size:    \n"
-            "Cost:                          \n");
-}
-
-void pmCalculatedOutput(){
-    printf("**** Physical Memory Calculated Values *****");
-    printf("Number of Physical Pages:");
-    printf("Number of Pages for System:");
-    printf("Size of Page Table Entry:");
-    printf("Total RAM for Page Table(s):");
-    
-}
-
-
-
-
+#include "main.h"
 
 int main(int argc, char *argv[]){
     if (argc < 8){
@@ -62,7 +15,6 @@ int main(int argc, char *argv[]){
                         "–f <trace file name> [ name of text file with the trace ]\n" ,argv[0]);
         return 1;
     }
-
 
     //Assign all CLI arguments to variables
     int cacheSize = atoi(argv[1]);
@@ -95,8 +47,6 @@ int main(int argc, char *argv[]){
         traceFile3[sizeof(traceFile3) - 1] = '\0';  // Null-terminate
     }
 
-inputOutput(cacheSize, blockSize, associativity, replacementPolicy,
-                percentageMem, intructionTimeSlice, traceFile1, traceFile2, traceFile3);
 
 
 

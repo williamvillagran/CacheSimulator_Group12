@@ -1,12 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -o
 
 TARGET = main
 
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(TARGET).c $(CFLAGS) $(TARGET) && ./main
 
 clean:
 	rm -f $(TARGET) *.o

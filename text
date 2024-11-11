@@ -7,7 +7,105 @@
 int blockReturn(int cache, int block){
         return cache/block;
 }
+int tagReturn(int block){#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+//Calculations
+int blockReturn(int cache, int block){
+        return cache/block;
+}
 int tagReturn(int block){
+        return log2(block);
+}
+int indexReturn(int numBlocks, int associativity){
+        int numSets = numBlocks / associativity;
+        return log2(numSets);
+}
+int numRows(int numBlocks, int associativity){
+        return numBlocks / associativity;
+}
+int overheadSize(int numBlocks, int tagSize) {
+    return numBlocks * tagSize / 8;
+}
+double cost(int implementationMemorySize) {
+    double memorySizeKB = implementationMemorySize / 1024.0;
+    return memorySizeKB * 0.15;
+}
+int numPhysPages(int physicalMem) {
+    int pageSize = 4096; // 4 KB
+    return (physicalMem * 1024 * 1024) / pageSize; // convert MB to bytes
+}
+int numPagesSys(int totalPhysPages, int percentageMem) {
+    return (totalPhysPages * percentageMem) / 100;
+}
+int sizePTE() {
+    return 19; // 19 bits per page table entry
+}
+int totalRAMPT(int numPTEs, int sizePTE) {
+    return numPTEs * sizePTE / 8;
+}
+
+
+//Console Outputs
+void inputOutput(int cache, int block, int associativity, char replacementPolicy[],
+                         int physicalMem, int percentageMem, int intructionTimeSlice,
+                         char traceFile1[], char traceFile2[], char traceFile3[]){
+    printf("Cache Simulator - CS 3853 - Group 12\n\n");
+    
+    printf("Trace File(s):\n"
+            "\t\t%s\n"
+            "\t\t%s\n"
+            "\t\t%s\n", traceFile1, traceFile2, traceFile3);
+
+
+    printf("***** Cache Input Parameters *****\n\n"
+            "Cache Size:                    %d\n"
+            "Block Size:                    %d\n"
+            "Associativity:                 %d\n"
+            "Replacement Policy:            %s\n"
+            "Physical Memory:               %d\n"
+            "Percent Memory Used by System: %d\n"
+            "Instructions / Time Slice:     %d\n"
+            ,cache, block, associativity, replacementPolicy, physicalMem, percentageMem, intructionTimeSlice);
+
+}
+
+void calculatedOutput(int cache, int block, int associativity) {
+    int numBlocks = blockReturn(cache, block);
+    int tagSize = tagReturn(block);
+    int indexSize = indexReturn(numBlocks, associativity);
+    int totalRows = numRows(numBlocks, associativity);
+    int overhead = overheadSize(numBlocks, tagSize);
+    int implementationMemSize = cache + overhead;
+    double cacheCost = cost(implementationMemSize);
+
+    printf("\n***** Cache Calculated Values *****\n\n"
+           "Total # Blocks:                %d\n"
+           "Tag Size:                      %d bits\n"
+           "Index Size:                    %d bits\n"
+           "Total # Rows:                  %d\n"
+           "Overhead Size:                 %d bytes\n"
+           "Implementation Memory Size:    %d bytes\n"
+           "Cost:                          $%.2f\n",
+           numBlocks, tagSize, indexSize, totalRows, overhead, implementationMemSize, cacheCost);
+}
+
+void pmCalculatedOutput(int physicalMem, int percentageMem) {
+    int totalPhysPages = numPhysPages(physicalMem);
+    int systemPages = numPagesSys(totalPhysPages, percentageMem);
+    int sizePTEBits = sizePTE();
+    int totalRAMForPT = totalRAMPT(totalPhysPages, sizePTEBits);
+
+    printf("\n***** Physical Memory Calculated Values *****\n\n"
+           "Number of Physical Pages:      %d\n"
+           "Number of Pages for System:    %d\n"
+           "Size of Page Table Entry:      %d bits\n"
+           "Total RAM for Page Table(s):   %d bytes\n",
+           totalPhysPages, systemPages, sizePTEBits, totalRAMForPT);
+}
+
         return log2(block);
 }
 int indexReturn(int numBlocks, int associativity){

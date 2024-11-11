@@ -6,7 +6,7 @@ TARGET = main
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(TARGET).c $(CFLAGS) $(TARGET) && ./main
+	$(CC) $(TARGET).c $(CFLAGS) $(TARGET)
 
 clean:
 	rm -f $(TARGET) *.o

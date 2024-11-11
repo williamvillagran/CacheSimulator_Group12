@@ -5,8 +5,8 @@
 
 int main(int argc, char *argv[]){
     
-    
-    if (argc < 8){
+    /*
+    if (argc < 1000){
         fprintf(stderr, "Usage: %s\n"
                         "-s <cache size - KB>       [ 8 to 8198 KB]\n"
                         "–b <block size>            [ 8 bytes to 64 bytes ]\n"
@@ -18,6 +18,7 @@ int main(int argc, char *argv[]){
                         "–f <trace file name> [ name of text file with the trace ]\n" ,argv[0]);
         return 1;
     }
+    */
     
     int cacheSize = 0;
     int blockSize = 0;
@@ -25,12 +26,13 @@ int main(int argc, char *argv[]){
     int physicalMem = 0;
     int percentageMem = 0;
     int instructionTimeSlice = 0;
+    int fileCount = 0;
 
     char replacementPolicy[30] = "";
 
-    char traceFile1[30] = "";
-    char traceFile2[30] = "";
-    char traceFile3[30] = "";
+    char traceFile1[250] = "";
+    char traceFile2[250] = "";
+    char traceFile3[250] = "";
     
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) 
@@ -65,25 +67,27 @@ int main(int argc, char *argv[]){
         else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) 
         {
             i++;
-            if (traceFile1[0] == '\0') 
-            {
+            
+            if (traceFile1[0] == '\0') {
                 strncpy(traceFile1, argv[i], sizeof(traceFile1) - 1);
                 traceFile1[sizeof(traceFile1) - 1] = '\0';
             } 
-            else if (traceFile2[0] == '\0') 
-            {
+
+            else if (traceFile2[0] == '\0') {
                 strncpy(traceFile2, argv[i], sizeof(traceFile2) - 1);
                 traceFile2[sizeof(traceFile2) - 1] = '\0';
             } 
-            else if (traceFile3[0] == '\0') 
-            {
+
+            else if (traceFile3[0] == '\0') {
                 strncpy(traceFile3, argv[i], sizeof(traceFile3) - 1);
                 traceFile3[sizeof(traceFile3) - 1] = '\0';
             } 
+
             else {
-                fprintf(stderr, "Error: Too many trace files specified. Only 3 allowed.\n");
+                fprintf(stderr, "Error: Too many trace files. Only 3 allowed.\n");
                 return 1;
             }
+            fileCount++;
         }
 
     }
@@ -91,7 +95,7 @@ int main(int argc, char *argv[]){
     //Functions to print output
     inputOutput(cacheSize, blockSize, associativity, replacementPolicy, physicalMem, percentageMem, instructionTimeSlice, traceFile1, traceFile2, traceFile3);
     calculatedOutput(cacheSize, blockSize, associativity);
-    pmCalculatedOutput(physicalMem, percentageMem);
+    pmCalculatedOutput(cacheSize, physicalMem, percentageMem, fileCount);
 
 return 0;
 }

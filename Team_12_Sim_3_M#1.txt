@@ -1,0 +1,32 @@
+Cache Simulator - CS 3853 - Group 12
+
+Trace File(s):
+		Trace1.trc
+		
+		
+***** Cache Input Parameters *****
+
+Cache Size:                    256 KB
+Block Size:                    8 bytes
+Associativity:                 8
+Replacement Policy:            rr
+Physical Memory:               512
+Percent Memory Used by System: 25.0%
+Instructions / Time Slice:     150
+
+***** Cache Calculated Values *****
+
+Total # Blocks:                32768
+Tag Size:                      17 bits
+Index Size:                    12 bits
+Total # Rows:                  4096
+Overhead Size:                 65536
+Implementation Memory Size:    320 KB(327680 bytes)
+Cost:                          $48.00 @ $0.15 per KB
+
+***** Physical Memory Calculated Values *****
+
+Number of Physical Pages:      131072
+Number of Pages for System:    32768
+Size of Page Table Entry:      19 bits
+Total RAM for Page Table(s):   622592 bytes

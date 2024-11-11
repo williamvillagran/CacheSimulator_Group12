@@ -1,12 +1,12 @@
 CC = gcc
 CFLAGS = -o
 
-TARGET = main
+TARGET = CacheSim_v1.12.exe
 
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(TARGET).c $(CFLAGS) $(TARGET)
+	$(CC) main.c $(CFLAGS) $(TARGET)
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -f $(TARGET) *.exe

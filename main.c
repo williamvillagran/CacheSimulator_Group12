@@ -5,8 +5,8 @@
 
 int main(int argc, char *argv[]){
     
-    /*
-    if (argc < 1000){
+    
+    if (argc < 8){
         fprintf(stderr, "Usage: %s\n"
                         "-s <cache size - KB>       [ 8 to 8198 KB]\n"
                         "–b <block size>            [ 8 bytes to 64 bytes ]\n"
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
                         "–f <trace file name> [ name of text file with the trace ]\n" ,argv[0]);
         return 1;
     }
-    */
+    
     
     int cacheSize = 0;
     int blockSize = 0;

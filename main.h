@@ -17,24 +17,31 @@ int indexReturn(int numBlocks, int associativity){
 int numRows(int numBlocks, int associativity){
         return numBlocks / associativity;
 }
-int overheadSize(){
-        //Fill in
+int overheadSize(int numBlocks, int tagSize, int associativity) {
+    int validBits = 1; 
+    int dirtyBits = 1; 
+    int overheadPerLine = tagSize + validBits + dirtyBits;
+    return numBlocks * overheadPerLine;
 }
-double cost(){
-        //Fill in
+double cost(int cacheSize, int blockSize, int overhead) {
+    double costPerByte = 0.05;  // Was confused here we can adjust if needed
+    return (cacheSize + overhead) * costPerByte;
 }
-int numPhysPages(){
-        //Fill in
+int numPhysPages(int physicalMem, int pageSize) {
+    return physicalMem / pageSize;
 }
-int numPagesSys(){
-        //Fill in
+int numPagesSys(int physicalMem, int percentageMem, int pageSize) {
+    int sysMem = (physicalMem * percentageMem) / 100;
+    return sysMem / pageSize;
 }
-int sizePTE(){
-        //Fill in
+int sizePTE() {
+    return 4; 
 }
-int totalRAMPT(){
-        //Fill in
+
+int totalRAMPT(int numPages, int sizePTE) {
+    return numPages * sizePTE;
 }
+
 
 
 //Console Outputs

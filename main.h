@@ -17,23 +17,25 @@ int indexReturn(int numBlocks, int associativity){
 int numRows(int numBlocks, int associativity){
         return numBlocks / associativity;
 }
-int overheadSize(){
-        //Fill in
+int overheadSize(int numBlocks, int tagSize) {
+    return numBlocks * tagSize / 8;
 }
-double cost(){
-        //Fill in
+double cost(int implementationMemorySize) {
+    double memorySizeKB = implementationMemorySize / 1024.0;
+    return memorySizeKB * 0.15;
 }
-int numPhysPages(){
-        //Fill in
+int numPhysPages(int physicalMem) {
+    int pageSize = 4096; // 4 KB
+    return (physicalMem * 1024 * 1024) / pageSize; // convert MB to bytes
 }
-int numPagesSys(){
-        //Fill in
+int numPagesSys(int totalPhysPages, int percentageMem) {
+    return (totalPhysPages * percentageMem) / 100;
 }
-int sizePTE(){
-        //Fill in
+int sizePTE() {
+    return 19; // 19 bits per page table entry
 }
-int totalRAMPT(){
-        //Fill in
+int totalRAMPT(int numPTEs, int sizePTE) {
+    return numPTEs * sizePTE / 8;
 }
 
 
@@ -61,6 +63,7 @@ void inputOutput(int cache, int block, int associativity, char replacementPolicy
 
 }
 
+/*
 void calculatedOutput(int cache, int block, int associativity){
     printf("***** Cache Calculated Values *****\n\n"
             "Total # Blocks:                \n"
@@ -74,6 +77,8 @@ void calculatedOutput(int cache, int block, int associativity){
                 numRows(blockReturn(cache, block), associativity), NULL, NULL, NULL);
 }               //Replace NULL with actual values
 
+
+
 void pmCalculatedOutput(){
     printf("***** Physical Memory Calculated Values *****\n\n"
             "Number of Physical Pages:      \n"
@@ -82,4 +87,39 @@ void pmCalculatedOutput(){
             "Total RAM for Page Table(s):   \n"
             , NULL, NULL, NULL, NULL);
             //Replace NULL for actual values
+}
+*/
+
+void calculatedOutput(int cache, int block, int associativity) {
+    int numBlocks = blockReturn(cache, block);
+    int tagSize = tagReturn(block);
+    int indexSize = indexReturn(numBlocks, associativity);
+    int totalRows = numRows(numBlocks, associativity);
+    int overhead = overheadSize(numBlocks, tagSize);
+    int implementationMemSize = cache + overhead;
+    double cacheCost = cost(implementationMemSize);
+
+    printf("\n***** Cache Calculated Values *****\n\n"
+           "Total # Blocks:                %d\n"
+           "Tag Size:                      %d bits\n"
+           "Index Size:                    %d bits\n"
+           "Total # Rows:                  %d\n"
+           "Overhead Size:                 %d bytes\n"
+           "Implementation Memory Size:    %d bytes\n"
+           "Cost:                          $%.2f\n",
+           numBlocks, tagSize, indexSize, totalRows, overhead, implementationMemSize, cacheCost);
+}
+
+void pmCalculatedOutput(int physicalMem, int percentageMem) {
+    int totalPhysPages = numPhysPages(physicalMem);
+    int systemPages = numPagesSys(totalPhysPages, percentageMem);
+    int sizePTEBits = sizePTE();
+    int totalRAMForPT = totalRAMPT(totalPhysPages, sizePTEBits);
+
+    printf("\n***** Physical Memory Calculated Values *****\n\n"
+           "Number of Physical Pages:      %d\n"
+           "Number of Pages for System:    %d\n"
+           "Size of Page Table Entry:      %d bits\n"
+           "Total RAM for Page Table(s):   %d bytes\n",
+           totalPhysPages, systemPages, sizePTEBits, totalRAMForPT);
 }

@@ -6,12 +6,13 @@
 int main(int argc, char *argv[]){
     
     
-    if (argc < 15){
+    if (argc < 8){
         fprintf(stderr, "Usage: %s\n"
                         "-s <cache size - KB>       [ 8 to 8198 KB]\n"
                         "–b <block size>            [ 8 bytes to 64 bytes ]\n"
                         "–a <associativity>         [ 1, 2, 4, 8, 16 ]\n"
                         "–r <replacement policy>    [ RR ]\n"
+                        "–p <physical memory - MB> [ 1 MB to 4 GB ]\n"
                         "-u <percentage phys mem used> [ 0 to 100 ]\n"
                         "-n <Instr / Time Slice [ 0 to -1 ] -1 = max]\n"
                         "–f <trace file name> [ name of text file with the trace ]\n" ,argv[0]);
@@ -87,22 +88,10 @@ int main(int argc, char *argv[]){
 
     }
 
-    // printf("***** Cache Input Parameters *****\n\n"
-    //        "Cache Size:                    %d KB\n"
-    //        "Block Size:                    %d bytes\n"
-    //        "Associativity:                 %d-way\n"
-    //        "Replacement Policy:            %s\n"
-    //        "Physical Memory:               %d MB\n"
-    //        "Percent Memory Used by System: %d%%\n"
-    //        "Instructions / Time Slice:     %d\n"
-    //        "Trace File 1:                  %s\n"
-    //        "Trace File 2:                  %s\n"
-    //        "Trace File 3:                  %s\n",
-    //        cacheSize, blockSize, associativity, replacementPolicy,
-    //        physicalMem, percentageMem, instructionTimeSlice,
-    //        traceFile1[0] != '\0' ? traceFile1 : "None",
-    //        traceFile2[0] != '\0' ? traceFile2 : "None",
-    //        traceFile3[0] != '\0' ? traceFile3 : "None");
+    //Functions to print output
+    inputOutput(cacheSize, blockSize, associativity, replacementPolicy, physicalMem, percentageMem, instructionTimeSlice, traceFile1, traceFile2, traceFile3);
+    calculatedOutput(cacheSize, blockSize, associativity);
+    pmCalculatedOutput(physicalMem, percentageMem);
 
 return 0;
 }

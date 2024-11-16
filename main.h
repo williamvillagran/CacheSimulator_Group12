@@ -118,3 +118,24 @@ void pmCalculatedOutput(int cache, int physicalMem, int percentageMem, int flagC
            "Total RAM for Page Table(s):   %d bytes\n", //
            totalPhysPages, systemPages, sizePTEBits, totalRAMForPT);
 }
+
+// Milestone 2 outputs
+
+void cacheSimResult(){
+    printf("\n***** CACHE SIMULATION RESULTS *****\n\n"
+            "Total Cache Accesses:          343626 (312222 addresses)\n"
+            "Instruction Bytes:             725273 SrcDst Bytes: 295084\n"
+            "Cache Hits:                    333593\n"
+            "Cache Misses:                  10033\n"
+            "--- Compulsory Misses:         9998\n"
+            "--- Conflict Misses:           35\n");
+}
+
+void cacheHitMiss(){
+    printf("\n***** ***** CACHE HIT & MISS RATE: ***** *****\n\n"
+            "Hit Rate:                      97.0803%%\n"
+            "Miss Rate:                     2.9197%%\n"
+            "CPI:                           4.38 Cycles/Instruction (238451)\n"
+            "Unused Cache Space:            400.25 KB / 576.00 KB = 69.49%% Waste: $60.04\n"
+            "Unused Cache Blocks:           22770 / 32768\n");
+}

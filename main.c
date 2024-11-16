@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]){
     
     
-    if (argc < 8){
+    if (argc < 0){
         fprintf(stderr, "Usage: %s\n"
                         "-s <cache size - KB>       [ 8 to 8198 KB]\n"
                         "–b <block size>            [ 8 bytes to 64 bytes ]\n"
@@ -92,10 +92,14 @@ int main(int argc, char *argv[]){
 
     }
 
-    //Functions to print output
+    //Functions to print output (Milestone #1)
     inputOutput(cacheSize, blockSize, associativity, replacementPolicy, physicalMem, percentageMem, instructionTimeSlice, traceFile1, traceFile2, traceFile3);
     calculatedOutput(cacheSize, blockSize, associativity);
     pmCalculatedOutput(cacheSize, physicalMem, percentageMem, fileCount);
+
+    //Functions to print output (Milestone #2)
+    cacheSimResult();
+    cacheHitMiss();
 
 return 0;
 }

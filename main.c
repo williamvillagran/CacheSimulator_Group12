@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
     int percentageMem = 0;
     int instructionTimeSlice = 0;
     int fileCount = 0;
+    int totalCacheAccess = 0;
 
     char replacementPolicy[30] = "";
 
@@ -88,6 +89,8 @@ int main(int argc, char *argv[]){
                 return 1;
             }
             fileCount++;
+            readFiles(traceFile1, traceFile2, traceFile3, totalCacheAccess);
+
         }
 
     }
@@ -97,9 +100,12 @@ int main(int argc, char *argv[]){
     calculatedOutput(cacheSize, blockSize, associativity);
     pmCalculatedOutput(cacheSize, physicalMem, percentageMem, fileCount);
 
+
     //Functions to print output (Milestone #2)
-    cacheSimResult();
-    cacheHitMiss();
+    // cacheSimResult();
+    // cacheHitMiss();
+
+
 
 return 0;
 }

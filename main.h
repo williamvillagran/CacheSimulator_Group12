@@ -8,6 +8,7 @@ int blockReturn(int cache, int block){
         int convertedCache = cache * 1024;
         return convertedCache/block;
 }
+
 int tagReturn(int sizeBlock, int numBlock, int associativity){
         int result;
         int bit32 = 32;
@@ -22,13 +23,16 @@ int tagReturn(int sizeBlock, int numBlock, int associativity){
         
         return result;
 }
+
 int indexReturn(int numBlocks, int associativity){
         int numSets = numBlocks / associativity;
         return log2(numSets);
 }
+
 int numRows(int numBlocks, int associativity){
         return numBlocks / associativity;
 }
+
 int overheadSize(int numBlocks, int tagSize) {
 
     int ret = (tagSize + 1) / 8;
@@ -38,14 +42,17 @@ int overheadSize(int numBlocks, int tagSize) {
     return ret;
     //return numBlocks * tagSize / 8;
 }
+
 double cost(int implementationMemorySize) {
     double memorySizeKB = implementationMemorySize / 1024.0;
     return memorySizeKB * 0.15;
 }
+
 int numPhysPages(int physicalMem) {
     int pageSize = 4096; // 4 KB
     return (physicalMem * 1024 * 1024) / pageSize; // convert MB to bytes
 }
+
 int numPagesSys(int physMem, int percentageMem) {
     float r = (float)percentageMem / 100.00;
     int systemMemKB = physMem * r * 1024; 
@@ -57,10 +64,23 @@ int numPagesSys(int physMem, int percentageMem) {
 int sizePTE() {
     return 19; // 19 bits per page table entry
 }
+
 int totalRAMPT(int cache, int numPTEs, int sizePTE, int flagCount) {
     return (cache * 1024) * flagCount * sizePTE / 8;
 }
 
+// M2 Calculations
+int instructBytes() {
+
+}
+
+int cacheHits() {
+
+}
+
+int cacheMisses() {
+
+}
 
 //Console Outputs
 void inputOutput(int cache, int block, int associativity, char replacementPolicy[],
@@ -138,4 +158,107 @@ void cacheHitMiss(){
             "CPI:                           4.38 Cycles/Instruction (238451)\n"
             "Unused Cache Space:            400.25 KB / 576.00 KB = 69.49%% Waste: $60.04\n"
             "Unused Cache Blocks:           22770 / 32768\n");
+}
+
+// Read Files
+void readFiles(char traceFile1, char traceFile2, char traceFile3, int totalCacheAccess) {
+    char buffer[256];
+    // char filePath1[1024]; // Use a larger buffer for safety
+    // char filePath2[1024]; // Use a larger buffer for safety
+    // char filePath3[1024]; // Use a larger buffer for safety
+
+    // snprintf(filePath1, sizeof(filePath1), "./Traces4Debugging/%s", argv[1]);
+    // snprintf(filePath2, sizeof(filePath2), "./Traces4Debugging/%s", argv[2]);
+    // snprintf(filePath3, sizeof(filePath3), "./Traces4Debugging/%s", argv[3]);
+
+    // FILE *file1 = fopen(filePath1, "r");
+    // FILE *file2 = fopen(filePath2, "r");
+    // FILE *file3 = fopen(filePath3, "r");
+
+    FILE *file1 = fopen(traceFile1, "r");
+    FILE *file2 = fopen(traceFile2, "r");
+    FILE *file3 = fopen(traceFile3, "r");
+
+    while (fgets(buffer, sizeof(buffer), file1) > 0) {
+        // get instruction address
+        if (strncmp(buffer, "EIP", 3) == 0) {
+            unsigned int address;
+            sscanf(buffer, "EIP (%*d): %x", &address);
+            totalCacheAccess++;
+            printf("File1 Instruction Address: %x\n", address);            
+        }
+        // get destination and source address
+        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
+            unsigned int dst;
+            unsigned int src;
+            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
+            if (dst != 0) {
+                totalCacheAccess++;
+                printf("File1 Destination Address: %x\n", dst);
+            }
+
+            if (src != 0) {
+                totalCacheAccess++;
+                printf("File1 Source Address: %x\n", src);
+            }
+
+        }
+    }
+
+    // Read from file2
+    while (fgets(buffer, sizeof(buffer), file2) > 0) {
+        // get instruction address
+        if (strncmp(buffer, "EIP", 3) == 0) {
+            unsigned int address;
+            sscanf(buffer, "EIP (%*d): %x", &address);
+            totalCacheAccess++;
+            printf("File2 Instruction Address: %x\n", address);
+        }
+        // get destination and source address
+        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
+            unsigned int dst;
+            unsigned int src;
+            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
+            if (dst != 0) {
+                totalCacheAccess++;
+                printf("File2 Destination Address: %x\n", dst);
+            }
+            if (src != 0) {
+                totalCacheAccess++;
+                printf("File2 Source Address: %x\n", src);
+            }
+        }
+    }
+
+    // Read from file3
+    while (fgets(buffer, sizeof(buffer), file3) > 0) {
+        // get instruction address
+        if (strncmp(buffer, "EIP", 3) == 0) {
+            unsigned int address;
+            sscanf(buffer, "EIP (%*d): %x", &address);
+            totalCacheAccess++;
+            printf("File1 Instruction Address: %x\n", address);
+        }
+        // get destination and source address
+        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
+            unsigned int dst;
+            unsigned int src;
+            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
+            if (dst != 0) {
+                totalCacheAccess++;
+                printf("File1 Destination Address: %x\n", dst);
+            }
+            if (src != 0) {
+                totalCacheAccess++;
+                printf("File1 Source Address: %x\n", src);
+            }
+        }
+    }
+
+    // Close the files
+    fclose(file1);
+    fclose(file2);
+    fclose(file3);
+
+    printf("Total Cache Accesses: %d\n", totalCacheAccess);
 }

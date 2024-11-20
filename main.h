@@ -206,20 +206,20 @@ void pmCalculatedOutput(int cache, int physicalMem, int percentageMem, int flagC
 
 // Milestone 2 outputs
 
-void cacheSimResult(int totalAccesses, int hits, int misses, int totalInst, int totalDst, int totalSrc){
-    int instBytes = totalInst;
+void cacheSimResult(int totalAccesses, int totalInst, int totalDst, int totalSrc, int hits, int misses){
     int srcDstBytes;
     int compMisses;
     int confMisses;
     
     printf("\n***** CACHE SIMULATION RESULTS *****\n\n"
-            "Total Cache Accesses:          \n"
-            "Instruction Bytes:             "
-            "SrcDst Bytes:                  \n"
-            "Cache Hits:                    \n"
-            "Cache Misses:                  \n"
-            "--- Compulsory Misses:         \n"
-            "--- Conflict Misses:           \n");
+            "Total Cache Accesses:          %d\n"
+            "Instruction Bytes:             %d"
+            "SrcDst Bytes:                  %d\n"
+            "Cache Hits:                    %d\n"
+            "Cache Misses:                  %d\n"
+            "--- Compulsory Misses:         %d\n"
+            "--- Conflict Misses:           %d\n"
+            , totalAccesses, totalInst, srcDstBytes, hits, misses, compMisses, confMisses);
 }
 
 void cacheHitMiss(float cacheHits, float missRate, float cpi, int uSpace, int uBlocks){
@@ -279,8 +279,11 @@ void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSi
     double missRate = calculateMissRate(misses, totalAccesses);
     double cpi = calculateCPI(totalCycles, totalAccesses);
 
-    cacheSimResult(totalAccesses, hits, misses, totalInst, totalDst, totalSrc);
+    int totalInst = totalInst * 4;
+
+    cacheSimResult(totalAccesses, totalInst, totalDst, totalSrc, hits, misses);
     cacheHitMiss(hitRate, missRate, cpi, 0, 0);
+    //Replace 0's with actual values
 
 
     
@@ -289,5 +292,3 @@ void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSi
 
     freeCache(&cache);
 }
-
-

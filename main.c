@@ -89,21 +89,29 @@ int main(int argc, char *argv[]){
                 return 1;
             }
             fileCount++;
-            readFiles(traceFile1, traceFile2, traceFile3, totalCacheAccess);
+            //readFiles(traceFile1, traceFile2, traceFile3, totalCacheAccess);
 
         }
 
     }
-
     //Functions to print output (Milestone #1)
     inputOutput(cacheSize, blockSize, associativity, replacementPolicy, physicalMem, percentageMem, instructionTimeSlice, traceFile1, traceFile2, traceFile3);
     calculatedOutput(cacheSize, blockSize, associativity);
     pmCalculatedOutput(cacheSize, physicalMem, percentageMem, fileCount);
 
 
-    //Functions to print output (Milestone #2)
-    // cacheSimResult();
-    // cacheHitMiss();
+
+    
+    readFiles(traceFile1, traceFile2, traceFile3, cacheSize, blockSize, associativity);
+
+
+
+
+
+
+
+
+
 
 
 

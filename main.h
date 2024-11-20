@@ -3,6 +3,84 @@
 #include <string.h>
 #include <math.h>
 
+/****************************************************************************/
+// Cache structures
+typedef struct {
+    unsigned int tag;  
+    int valid;        
+    int metadata;      
+} CacheBlock;
+
+typedef struct {
+    CacheBlock *blocks;
+} CacheSet;
+
+typedef struct {
+    CacheSet *sets;
+    int numSets;       
+    int associativity; 
+    int blockSize;     
+} Cache;
+
+Cache initializeCache(int cacheSize, int blockSize, int associativity) {
+    Cache cache;
+    int numBlocks = (cacheSize * 1024) / blockSize;
+    cache.numSets = numBlocks / associativity;
+    cache.associativity = associativity;
+    cache.blockSize = blockSize;
+    cache.sets = malloc(sizeof(CacheSet) * cache.numSets);
+
+    for (int i = 0; i < cache.numSets; i++) {
+        cache.sets[i].blocks = malloc(sizeof(CacheBlock) * associativity);
+        for (int j = 0; j < associativity; j++) {
+            cache.sets[i].blocks[j].valid = 0;
+            cache.sets[i].blocks[j].metadata = 0;
+        }
+    }
+    return cache;
+}
+
+int accessCache(Cache *cache, unsigned int address, int *hits, int *misses) {
+    int index = (address / cache->blockSize) % cache->numSets;
+    unsigned int tag = address / (cache->blockSize * cache->numSets);
+    CacheSet *set = &cache->sets[index];
+
+    for (int i = 0; i < cache->associativity; i++) {
+        if (set->blocks[i].valid && set->blocks[i].tag == tag) {
+            (*hits)++;
+            return 1; // Cache hit
+        }
+    }
+
+    // Cache miss: Replace a block (e.g., round-robin)
+    (*misses)++;
+    int replaceIndex = rand() % cache->associativity; // Random replacement
+    set->blocks[replaceIndex].tag = tag;
+    set->blocks[replaceIndex].valid = 1;
+    return 0; // Cache miss
+}
+
+void freeCache(Cache *cache) {
+    for (int i = 0; i < cache->numSets; i++) {
+        free(cache->sets[i].blocks);
+    }
+    free(cache->sets);
+}
+
+double calculateHitRate(int hits, int totalAccesses) {
+    return (double)hits / totalAccesses * 100.0;
+}
+
+double calculateMissRate(int misses, int totalAccesses) {
+    return (double)misses / totalAccesses * 100.0;
+}
+
+double calculateCPI(int totalCycles, int instructions) {
+    return (double)totalCycles / instructions;
+}
+
+/*************************************************************************/
+
 //Calculations
 int blockReturn(int cache, int block){
         int convertedCache = cache * 1024;
@@ -69,19 +147,6 @@ int totalRAMPT(int cache, int numPTEs, int sizePTE, int flagCount) {
     return (cache * 1024) * flagCount * sizePTE / 8;
 }
 
-// M2 Calculations
-int instructBytes() {
-
-}
-
-int cacheHits() {
-
-}
-
-int cacheMisses() {
-
-}
-
 //Console Outputs
 void inputOutput(int cache, int block, int associativity, char replacementPolicy[],
                          int physicalMem, float percentageMem, int intructionTimeSlice,
@@ -141,124 +206,88 @@ void pmCalculatedOutput(int cache, int physicalMem, int percentageMem, int flagC
 
 // Milestone 2 outputs
 
-void cacheSimResult(){
+void cacheSimResult(int totalAccesses, int hits, int misses, int totalInst, int totalDst, int totalSrc){
+    int instBytes = totalInst;
+    int srcDstBytes;
+    int compMisses;
+    int confMisses;
+    
     printf("\n***** CACHE SIMULATION RESULTS *****\n\n"
-            "Total Cache Accesses:          343626 (312222 addresses)\n"
-            "Instruction Bytes:             725273 SrcDst Bytes: 295084\n"
-            "Cache Hits:                    333593\n"
-            "Cache Misses:                  10033\n"
-            "--- Compulsory Misses:         9998\n"
-            "--- Conflict Misses:           35\n");
+            "Total Cache Accesses:          \n"
+            "Instruction Bytes:             "
+            "SrcDst Bytes:                  \n"
+            "Cache Hits:                    \n"
+            "Cache Misses:                  \n"
+            "--- Compulsory Misses:         \n"
+            "--- Conflict Misses:           \n");
 }
 
-void cacheHitMiss(){
+void cacheHitMiss(float cacheHits, float missRate, float cpi, int uSpace, int uBlocks){
     printf("\n***** ***** CACHE HIT & MISS RATE: ***** *****\n\n"
-            "Hit Rate:                      97.0803%%\n"
-            "Miss Rate:                     2.9197%%\n"
-            "CPI:                           4.38 Cycles/Instruction (238451)\n"
-            "Unused Cache Space:            400.25 KB / 576.00 KB = 69.49%% Waste: $60.04\n"
-            "Unused Cache Blocks:           22770 / 32768\n");
+            "Hit Rate:                      %.4f%%\n"
+            "Miss Rate:                     %.4f%%\n"
+            "CPI:                           %.2f Cycles/Instruction\n"
+            "Unused Cache Space:            %d\n"
+            "Unused Cache Blocks:           %d\n"
+            , cacheHits, missRate, cpi, uSpace, uBlocks);
 }
 
-// Read Files
-void readFiles(char traceFile1, char traceFile2, char traceFile3, int totalCacheAccess) {
+void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSize, int blockSize, int associativity) {
     char buffer[256];
-    // char filePath1[1024]; // Use a larger buffer for safety
-    // char filePath2[1024]; // Use a larger buffer for safety
-    // char filePath3[1024]; // Use a larger buffer for safety
+    int hits = 0;
+    int misses = 0;
+    int totalCycles = 0;
+    int totalAccesses = 0;
+    int totalInst = 0;
+    int totalDst, totalSrc = 0;
 
-    // snprintf(filePath1, sizeof(filePath1), "./Traces4Debugging/%s", argv[1]);
-    // snprintf(filePath2, sizeof(filePath2), "./Traces4Debugging/%s", argv[2]);
-    // snprintf(filePath3, sizeof(filePath3), "./Traces4Debugging/%s", argv[3]);
+    Cache cache = initializeCache(cacheSize, blockSize, associativity);
+    FILE *files[] = {fopen(traceFile1, "r"), fopen(traceFile2, "r"), fopen(traceFile3, "r")};
+    for (int f = 0; f < 3; f++) {
+        if (files[f] == NULL) continue;
 
-    // FILE *file1 = fopen(filePath1, "r");
-    // FILE *file2 = fopen(filePath2, "r");
-    // FILE *file3 = fopen(filePath3, "r");
-
-    FILE *file1 = fopen(traceFile1, "r");
-    FILE *file2 = fopen(traceFile2, "r");
-    FILE *file3 = fopen(traceFile3, "r");
-
-    while (fgets(buffer, sizeof(buffer), file1) > 0) {
-        // get instruction address
-        if (strncmp(buffer, "EIP", 3) == 0) {
+        while (fgets(buffer, sizeof(buffer), files[f])) {
             unsigned int address;
-            sscanf(buffer, "EIP (%*d): %x", &address);
-            totalCacheAccess++;
-            printf("File1 Instruction Address: %x\n", address);            
-        }
-        // get destination and source address
-        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
-            unsigned int dst;
-            unsigned int src;
-            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
-            if (dst != 0) {
-                totalCacheAccess++;
-                printf("File1 Destination Address: %x\n", dst);
-            }
 
-            if (src != 0) {
-                totalCacheAccess++;
-                printf("File1 Source Address: %x\n", src);
+            if (strncmp(buffer, "EIP", 3) == 0) {
+                sscanf(buffer, "EIP (%*d): %x", &address);
+                totalInst++;
+                totalAccesses++;
+                totalCycles += accessCache(&cache, address, &hits, &misses) ? 1 : 4;
+                totalCycles += 2; // Instruction execution
+            } else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
+                unsigned int dst, src;
+                sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
+                if (dst != 0) {
+                    totalDst++;
+                    totalAccesses++;
+                    totalCycles += accessCache(&cache, dst, &hits, &misses) ? 1 : 4;
+                    totalCycles += 1;
+                }
+                if (src != 0) {
+                    totalSrc++;
+                    totalAccesses++;
+                    totalCycles += accessCache(&cache, src, &hits, &misses) ? 1 : 4;
+                    totalCycles += 1;
+                }
             }
-
         }
+        fclose(files[f]);
     }
 
-    // Read from file2
-    while (fgets(buffer, sizeof(buffer), file2) > 0) {
-        // get instruction address
-        if (strncmp(buffer, "EIP", 3) == 0) {
-            unsigned int address;
-            sscanf(buffer, "EIP (%*d): %x", &address);
-            totalCacheAccess++;
-            printf("File2 Instruction Address: %x\n", address);
-        }
-        // get destination and source address
-        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
-            unsigned int dst;
-            unsigned int src;
-            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
-            if (dst != 0) {
-                totalCacheAccess++;
-                printf("File2 Destination Address: %x\n", dst);
-            }
-            if (src != 0) {
-                totalCacheAccess++;
-                printf("File2 Source Address: %x\n", src);
-            }
-        }
-    }
+    double hitRate = calculateHitRate(hits, totalAccesses);
+    double missRate = calculateMissRate(misses, totalAccesses);
+    double cpi = calculateCPI(totalCycles, totalAccesses);
 
-    // Read from file3
-    while (fgets(buffer, sizeof(buffer), file3) > 0) {
-        // get instruction address
-        if (strncmp(buffer, "EIP", 3) == 0) {
-            unsigned int address;
-            sscanf(buffer, "EIP (%*d): %x", &address);
-            totalCacheAccess++;
-            printf("File1 Instruction Address: %x\n", address);
-        }
-        // get destination and source address
-        else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
-            unsigned int dst;
-            unsigned int src;
-            sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
-            if (dst != 0) {
-                totalCacheAccess++;
-                printf("File1 Destination Address: %x\n", dst);
-            }
-            if (src != 0) {
-                totalCacheAccess++;
-                printf("File1 Source Address: %x\n", src);
-            }
-        }
-    }
+    cacheSimResult(totalAccesses, hits, misses, totalInst, totalDst, totalSrc);
+    cacheHitMiss(hitRate, missRate, cpi, 0, 0);
 
-    // Close the files
-    fclose(file1);
-    fclose(file2);
-    fclose(file3);
 
-    printf("Total Cache Accesses: %d\n", totalCacheAccess);
+    
+    //printf("Cache Hits: %d, Misses: %d, Hit Rate: %.2f%%, Miss Rate: %.2f%%, CPI: %.2f\n",
+        //    hits, misses, hitRate, missRate, cpi);
+
+    freeCache(&cache);
 }
+
+

@@ -40,10 +40,15 @@ Cache initializeCache(int cacheSize, int blockSize, int associativity) {
     return cache;
 }
 
-int accessCache(Cache *cache, unsigned int address, int *hits, int *misses) {
+int accessCache(Cache *cache, unsigned int address, int *hits, int *misses, int *compMisses) {
     int index = (address / cache->blockSize) % cache->numSets;
     unsigned int tag = address / (cache->blockSize * cache->numSets);
     CacheSet *set = &cache->sets[index];
+
+    // if (!accessedBlocks[tag]) {
+    //     (*compMisses)++;      // Increment compulsory miss count
+    //     accessedBlocks[tag] = true; // Mark the block as accessed
+    // }
 
     for (int i = 0; i < cache->associativity; i++) {
         if (set->blocks[i].valid && set->blocks[i].tag == tag) {
@@ -78,6 +83,14 @@ double calculateMissRate(int misses, int totalAccesses) {
 double calculateCPI(int totalCycles, int instructions) {
     return (double)totalCycles / instructions;
 }
+
+/// 
+///  
+int calculateCompMisses(int cacheSize, int blockSize) {
+
+}
+
+
 
 /*************************************************************************/
 
@@ -204,17 +217,15 @@ void pmCalculatedOutput(int cache, int physicalMem, int percentageMem, int flagC
            totalPhysPages, systemPages, sizePTEBits, totalRAMForPT);
 }
 
-// Milestone 2 outputs
+// Milestone 2 outputs *****************************************************
 
-void cacheSimResult(int totalAccesses, int totalInst, int totalDst, int totalSrc, int hits, int misses){
-    int srcDstBytes;
-    int compMisses;
-    int confMisses;
+void cacheSimResult(int totalAccesses, int totalInst, int totalDstBytes, int totalSrcBytes, int hits, int misses, int compMisses, int confMisses){
+    float srcDstBytes = (float) totalSrcBytes + totalDstBytes;
     
     printf("\n***** CACHE SIMULATION RESULTS *****\n\n"
             "Total Cache Accesses:          %d\n"
-            "Instruction Bytes:             %d"
-            "SrcDst Bytes:                  %d\n"
+            "Instruction Bytes:             %d "
+            " SrcDst Bytes:                  %.2f\n"
             "Cache Hits:                    %d\n"
             "Cache Misses:                  %d\n"
             "--- Compulsory Misses:         %d\n"
@@ -236,10 +247,13 @@ void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSi
     char buffer[256];
     int hits = 0;
     int misses = 0;
+    int compMisses = 0;
+    int confMisses = 0;
     int totalCycles = 0;
     int totalAccesses = 0;
     int totalInst = 0;
-    int totalDst, totalSrc = 0;
+    int totalDst = 0;
+    int totalSrc = 0;
 
     Cache cache = initializeCache(cacheSize, blockSize, associativity);
     FILE *files[] = {fopen(traceFile1, "r"), fopen(traceFile2, "r"), fopen(traceFile3, "r")};
@@ -248,26 +262,24 @@ void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSi
 
         while (fgets(buffer, sizeof(buffer), files[f])) {
             unsigned int address;
+            int bitMulti;
 
             if (strncmp(buffer, "EIP", 3) == 0) {
-                sscanf(buffer, "EIP (%*d): %x", &address);
-                totalInst++;
-                totalAccesses++;
-                totalCycles += accessCache(&cache, address, &hits, &misses) ? 1 : 4;
+                sscanf(buffer, "EIP (%d): %x", &bitMulti, &address);
+                totalInst += bitMulti;
+                totalCycles += accessCache(&cache, address, &hits, &misses, &compMisses) ? 1 : 4;
                 totalCycles += 2; // Instruction execution
             } else if (strncmp(buffer, "dstM", 4) == 0 || strncmp(buffer, "srcM", 4) == 0) {
                 unsigned int dst, src;
                 sscanf(buffer, "dstM: %x srcM: %x", &dst, &src);
                 if (dst != 0) {
                     totalDst++;
-                    totalAccesses++;
-                    totalCycles += accessCache(&cache, dst, &hits, &misses) ? 1 : 4;
+                    totalCycles += accessCache(&cache, dst, &hits, &misses, &compMisses) ? 1 : 4;
                     totalCycles += 1;
                 }
                 if (src != 0) {
                     totalSrc++;
-                    totalAccesses++;
-                    totalCycles += accessCache(&cache, src, &hits, &misses) ? 1 : 4;
+                    totalCycles += accessCache(&cache, src, &hits, &misses, &compMisses) ? 1 : 4;
                     totalCycles += 1;
                 }
             }
@@ -275,20 +287,24 @@ void readFiles(char *traceFile1, char *traceFile2, char *traceFile3, int cacheSi
         fclose(files[f]);
     }
 
+    totalAccesses = hits + misses;
+
+    int totalDstBytes = totalDst * 4;
+    int totalSrcBytes = totalSrc * 4;
+
     double hitRate = calculateHitRate(hits, totalAccesses);
     double missRate = calculateMissRate(misses, totalAccesses);
     double cpi = calculateCPI(totalCycles, totalAccesses);
 
-    int totalInst = totalInst * 4;
-
-    cacheSimResult(totalAccesses, totalInst, totalDst, totalSrc, hits, misses);
+    
+    cacheSimResult(totalAccesses, totalInst, totalDstBytes, totalSrcBytes, hits, misses, compMisses, confMisses);
     cacheHitMiss(hitRate, missRate, cpi, 0, 0);
     //Replace 0's with actual values
 
 
     
     //printf("Cache Hits: %d, Misses: %d, Hit Rate: %.2f%%, Miss Rate: %.2f%%, CPI: %.2f\n",
-        //    hits, misses, hitRate, missRate, cpi);
+    //    hits, misses, hitRate, missRate, cpi);
 
     freeCache(&cache);
 }

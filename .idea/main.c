@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
- 
+
 int main(int argc, char *argv[]){
     
     
-    if (argc < 0){
+    if (argc < 8){
         fprintf(stderr, "Usage: %s\n"
                         "-s <cache size - KB>       [ 8 to 8198 KB]\n"
                         "–b <block size>            [ 8 bytes to 64 bytes ]\n"
@@ -27,7 +27,6 @@ int main(int argc, char *argv[]){
     int percentageMem = 0;
     int instructionTimeSlice = 0;
     int fileCount = 0;
-    int totalCacheAccess = 0;
 
     char replacementPolicy[30] = "";
 
@@ -89,31 +88,14 @@ int main(int argc, char *argv[]){
                 return 1;
             }
             fileCount++;
-            //readFiles(traceFile1, traceFile2, traceFile3, totalCacheAccess);
-
         }
 
     }
-    //Functions to print output (Milestone #1)
+
+    //Functions to print output
     inputOutput(cacheSize, blockSize, associativity, replacementPolicy, physicalMem, percentageMem, instructionTimeSlice, traceFile1, traceFile2, traceFile3);
     calculatedOutput(cacheSize, blockSize, associativity);
     pmCalculatedOutput(cacheSize, physicalMem, percentageMem, fileCount);
-
-
-
-    
-    readFiles(traceFile1, traceFile2, traceFile3, cacheSize, blockSize, associativity);
-
-
-
-
-
-
-
-
-
-
-
 
 return 0;
 }
